@@ -1,96 +1,58 @@
+/* Modern Command Input Styles */
 .command-input-container {
   position: relative;
   margin-top: 20px;
-}
-
-.suggestions-popup {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(102, 126, 234, 0.3);
-  border-radius: 12px;
-  margin-bottom: 10px;
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 1000;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.suggestions-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(102, 126, 234, 0.1);
-}
-
-.suggestions-header span:first-child {
-  color: #667eea;
-  font-weight: 600;
-  font-size: 12px;
-}
-
-.suggestions-hint {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 11px;
-}
-
-.suggestions-list {
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.suggestion-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-}
-
-.suggestion-item:hover,
-.suggestion-item.selected {
-  background: rgba(102, 126, 234, 0.2);
-  border-left-color: #667eea;
-}
-
-.suggestion-item.selected {
-  background: rgba(102, 126, 234, 0.3);
-}
-
-.suggestion-icon {
-  font-size: 14px;
-  min-width: 16px;
-}
-
-.suggestion-text {
-  color: #ffffff;
-  font-size: 13px;
-  line-height: 1.4;
+  z-index: 10;
 }
 
 .command-form {
-  width: 100%;
+  position: relative;
 }
 
 .prompt-line {
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
+  gap: 8px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.prompt-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
+}
+
+.prompt-line:focus-within {
+  border-color: rgba(102, 126, 234, 0.5);
+  box-shadow: 
+    0 8px 30px rgba(102, 126, 234, 0.2),
+    0 0 0 1px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 .prompt {
-  color: #4ecdc4;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 14px;
   font-weight: 600;
+  color: #4ecdc4;
   white-space: nowrap;
-  user-select: none;
+  text-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+  letter-spacing: 0.5px;
 }
 
 .input-wrapper {
@@ -105,57 +67,181 @@
   background: transparent;
   border: none;
   outline: none;
-  color: #ffffff;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 14px;
-  line-height: 1.6;
-  padding: 0;
+  color: #ffffff;
   caret-color: #667eea;
+  width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 .command-input::placeholder {
   color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
 }
 
+.command-input:focus {
+  outline: none;
+}
+
+.typing-indicator {
+  position: relative;
+  width: 2px;
+  height: 20px;
+  margin-left: 4px;
+}
+
+.cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 20px;
+  background: linear-gradient(135deg, #667eea, #4ecdc4);
+  border-radius: 1px;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+/* Suggestions Popup */
+.suggestions-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(26, 26, 46, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.suggestions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(78, 205, 196, 0.1));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.suggestions-header span:first-child {
+  color: #4ecdc4;
+}
+
+.suggestions-hint {
+  font-size: 10px;
+  opacity: 0.7;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.suggestions-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.suggestions-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.suggestions-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 2px;
+}
+
+.suggestions-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.5);
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  position: relative;
+  overflow: hidden;
+}
+
+.suggestion-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.suggestion-item:hover::before {
+  opacity: 1;
+}
+
+.suggestion-item:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateX(4px);
+}
+
+.suggestion-item.selected {
+  background: rgba(102, 126, 234, 0.2);
+  border-left: 3px solid #667eea;
+}
+
+.suggestion-icon {
+  font-size: 14px;
+  opacity: 0.7;
+  width: 16px;
+  text-align: center;
+}
+
+.suggestion-text {
+  flex: 1;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  color: #ffffff;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+/* Loading States */
 .command-input:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.typing-indicator {
-  position: relative;
+.command-input:disabled::placeholder {
+  color: rgba(255, 255, 255, 0.3);
 }
 
-.cursor {
-  width: 2px;
-  height: 20px;
-  background: #667eea;
-  margin-left: 2px;
-}
-
-/* Custom scrollbar for suggestions */
-.suggestions-popup::-webkit-scrollbar {
-  width: 6px;
-}
-
-.suggestions-popup::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 3px;
-}
-
-.suggestions-popup::-webkit-scrollbar-thumb {
-  background: rgba(102, 126, 234, 0.5);
-  border-radius: 3px;
-}
-
-.suggestions-popup::-webkit-scrollbar-thumb:hover {
-  background: rgba(102, 126, 234, 0.7);
-}
-
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 768px) {
   .prompt-line {
-    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+  
+  .prompt {
+    font-size: 12px;
   }
   
   .command-input {
@@ -163,14 +249,64 @@
   }
   
   .suggestions-popup {
-    max-height: 200px;
+    border-radius: 8px;
   }
   
   .suggestion-item {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .prompt-line {
     padding: 10px 12px;
   }
   
-  .suggestion-text {
-    font-size: 12px;
+  .suggestions-header {
+    padding: 8px 12px;
+    font-size: 11px;
   }
+  
+  .suggestion-item {
+    padding: 6px 10px;
+  }
+}
+
+/* Animation Enhancements */
+@keyframes inputFocus {
+  from {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  to {
+    box-shadow: 
+      0 8px 30px rgba(102, 126, 234, 0.2),
+      0 0 0 1px rgba(102, 126, 234, 0.3);
+  }
+}
+
+.prompt-line:focus-within {
+  animation: inputFocus 0.3s ease forwards;
+}
+
+/* Custom Selection */
+.command-input::selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: inherit;
+}
+
+.command-input::-moz-selection {
+  background: rgba(102, 126, 234, 0.3);
+  color: inherit;
+}
+
+/* Hover Effects */
+.suggestion-item:hover .suggestion-icon {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+.suggestion-item:hover .suggestion-text {
+  color: #4ecdc4;
+  transition: color 0.2s ease;
 }

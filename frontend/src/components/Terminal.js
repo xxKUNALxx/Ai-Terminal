@@ -217,18 +217,27 @@ const TerminalContent = () => {
         onDirectorySelect={handleDirectorySelect}
       />
       
-      <div 
+      <motion.div 
         className="terminal-main"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         style={{
-          background: themeColors.background,
-          border: `1px solid ${themeColors.border}`
+          background: `linear-gradient(135deg, ${themeColors.background} 0%, ${themeColors.surface} 100%)`,
+          border: `1px solid ${themeColors.border}`,
+          boxShadow: `0 20px 40px ${themeColors.primary}15, 0 0 0 1px ${themeColors.border}`,
+          backdropFilter: 'blur(10px)'
         }}
       >
-        <div 
+        <motion.div 
           className="terminal-header"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
           style={{
-            background: themeColors.surface,
-            borderBottom: `1px solid ${themeColors.border}`
+            background: `linear-gradient(135deg, ${themeColors.surface} 0%, ${themeColors.background} 100%)`,
+            borderBottom: `1px solid ${themeColors.border}`,
+            boxShadow: `0 2px 10px ${themeColors.primary}10`
           }}
         >
           <div className="terminal-controls">
@@ -257,12 +266,18 @@ const TerminalContent = () => {
           >
             {currentDirectory} +
           </div>
-        </div>
+        </motion.div>
 
-        <div 
+        <motion.div 
           className="terminal-content" 
           ref={terminalRef}
-          style={{ color: themeColors.text }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          style={{ 
+            color: themeColors.text,
+            background: `linear-gradient(135deg, ${themeColors.background} 0%, ${themeColors.surface} 100%)`
+          }}
         >
           <AnimatePresence>
             {history.map((entry, index) => (
@@ -302,8 +317,8 @@ const TerminalContent = () => {
             themeColors={themeColors}
             selectedCommand={selectedCommand}
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       <SettingsPanel 
         isOpen={showSettings}
