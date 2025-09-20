@@ -1,0 +1,157 @@
+.output-line {
+  margin-bottom: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.command-line {
+  margin-bottom: 4px;
+}
+
+.command-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.command-prompt {
+  color: #4ecdc4;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.command-text {
+  color: #ffffff;
+  flex: 1;
+}
+
+.command-timestamp {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.output-display {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  position: relative;
+  padding-left: 4px;
+}
+
+.system-prefix,
+.error-prefix {
+  font-size: 12px;
+  margin-top: 2px;
+  min-width: 16px;
+}
+
+.output-content {
+  flex: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.output-line-content {
+  margin-bottom: 2px;
+}
+
+.output-line-content:last-child {
+  margin-bottom: 0;
+}
+
+.output-timestamp {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 10px;
+  margin-left: auto;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* Different output types */
+.output-line-normal {
+  color: #ffffff;
+}
+
+.output-line-error {
+  color: #ff6b6b;
+}
+
+.output-line-error .output-content {
+  background: rgba(255, 107, 107, 0.1);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #ff6b6b;
+}
+
+.output-line-system {
+  color: #4ecdc4;
+}
+
+.output-line-system .output-content {
+  background: rgba(78, 205, 196, 0.1);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #4ecdc4;
+}
+
+/* Special formatting for structured output */
+.output-content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.output-content code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+/* Syntax highlighting for common patterns */
+.output-content .file-path {
+  color: #ffd700;
+}
+
+.output-content .number {
+  color: #ff9f43;
+}
+
+.output-content .string {
+  color: #26de81;
+}
+
+.output-content .keyword {
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .output-line {
+    font-size: 12px;
+  }
+  
+  .command-display {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .command-timestamp,
+  .output-timestamp {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 9px;
+  }
+  
+  .output-display {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
