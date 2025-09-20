@@ -126,14 +126,15 @@ async def get_status():
     }
 
 # Serve static files from frontend build directory
-if os.path.exists("../frontend/build"):
-    app.mount("/", StaticFiles(directory="../frontend/build", html=True), name="static")
+frontend_build_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "build")
+if os.path.exists(frontend_build_path):
+    app.mount("/", StaticFiles(directory=frontend_build_path, html=True), name="static")
     
     @app.get("/{path:path}")
     async def serve_spa(path: str):
         """Serve the React app for any non-API routes."""
         if not path.startswith("api/"):
-            return FileResponse("../frontend/build/index.html")
+            return FileResponse(os.path.join(frontend_build_path, "index.html"))
         return {"error": "Not found"}
 
 if __name__ == "__main__":

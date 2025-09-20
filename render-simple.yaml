@@ -1,0 +1,27 @@
+services:
+  # Single service deployment (Backend + Frontend)
+  - type: web
+    name: ai-terminal
+    env: python
+    plan: free
+    buildCommand: |
+      # Install Python dependencies
+      pip install -r requirements.txt
+      pip install -r backend/requirements.txt
+      
+      # Install Node.js and build frontend
+      curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+      apt-get install -y nodejs
+      
+      # Build frontend
+      cd frontend
+      npm install
+      npm run build
+      cd ..
+    startCommand: python backend/main_production.py
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: PYTHON_VERSION
+        value: 3.9.0
+    healthCheckPath: /api/status
