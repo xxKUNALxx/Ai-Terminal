@@ -4,9 +4,7 @@ services:
     name: terminal-backend
     env: python
     plan: free
-    buildCommand: |
-      pip install -r backend/requirements.txt
-      pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && pip install -r backend/requirements.txt
     startCommand: python backend/main_production.py
     envVars:
       - key: PORT

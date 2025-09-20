@@ -1,0 +1,14 @@
+services:
+  # Backend API Service Only
+  - type: web
+    name: ai-terminal-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python backend/main_production.py
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: PYTHON_VERSION
+        value: 3.9.0
+    healthCheckPath: /api/status
