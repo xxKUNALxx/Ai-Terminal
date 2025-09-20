@@ -110,7 +110,8 @@ const TerminalContent = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/execute', {
+      const apiUrl = process.env.REACT_APP_API_URL || '';
+      const response = await axios.post(`${apiUrl}/api/execute`, {
         command: command.trim()
       });
 
@@ -160,7 +161,8 @@ const TerminalContent = () => {
     
     // Try to get AI suggestions for natural language
     try {
-      const response = await axios.post('/api/suggestions', {
+      const apiUrl = process.env.REACT_APP_API_URL || '';
+      const response = await axios.post(`${apiUrl}/api/suggestions`, {
         partial: partial
       });
       const aiSuggestions = response.data.suggestions || [];
