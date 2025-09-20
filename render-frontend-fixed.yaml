@@ -1,0 +1,12 @@
+services:
+  # Frontend Static Site - Fixed Version
+  - type: static
+    name: ai-terminal-frontend
+    buildCommand: |
+      cd /opt/render/project/src/frontend
+      npm install
+      npm run build
+    staticPublishPath: frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://your-backend-url.onrender.com
