@@ -1,0 +1,9 @@
+services:
+  # Frontend Static Site
+  - type: static
+    name: ai-terminal-frontend
+    buildCommand: chmod +x build-frontend.sh && ./build-frontend.sh
+    staticPublishPath: frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://your-backend-url.onrender.com
