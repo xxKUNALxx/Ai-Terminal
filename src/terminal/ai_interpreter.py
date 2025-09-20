@@ -28,22 +28,77 @@ class GeminiAIInterpreter:
                 print(f"Warning: Could not initialize Gemini AI: {e}")
                 self.model = None
     
+    def is_natural_language(self, input_text: str) -> bool:
+        """
+        Determine if the input is natural language or a terminal command.
+        
+        Args:
+            input_text: Input string to analyze
+            
+        Returns:
+            True if input appears to be natural language, False if it's a command
+        """
+        input_text = input_text.strip().lower()
+        
+        # If it starts with common command patterns, it's likely a command
+        command_indicators = [
+            'ls', 'cd', 'pwd', 'mkdir', 'rm', 'cp', 'mv', 'cat', 'echo', 'touch',
+            'find', 'grep', 'ps', 'top', 'df', 'whoami', 'date', 'clear', 'history',
+            'git', 'npm', 'docker', 'python', 'node', 'sudo', 'chmod', 'chown'
+        ]
+        
+        first_word = input_text.split()[0] if input_text else ""
+        if first_word in command_indicators:
+            return False
+        
+        # If it contains natural language indicators, it's likely natural language
+        natural_language_indicators = [
+            'create', 'make', 'show', 'display', 'list', 'go to', 'change to',
+            'navigate to', 'delete', 'remove', 'copy', 'move', 'find', 'search',
+            'look for', 'where', 'what', 'how', 'can you', 'please', 'help me',
+            'i want', 'i need', 'tell me', 'give me', 'open', 'close', 'start',
+            'stop', 'run', 'execute', 'launch', 'install', 'uninstall', 'update'
+        ]
+        
+        for indicator in natural_language_indicators:
+            if indicator in input_text:
+                return True
+        
+        # If it's a single word and not a command, it might be natural language
+        if len(input_text.split()) == 1 and first_word not in command_indicators:
+            return True
+        
+        # If it contains spaces and doesn't start with a command, likely natural language
+        if ' ' in input_text and first_word not in command_indicators:
+            return True
+        
+        return False
+
     def _init_fallback_patterns(self):
         """Initialize fallback regex patterns for when AI is unavailable."""
         return {
             # File operations
             r'create (?:a )?(?:new )?(?:file|document) (?:called |named )?(.+)': 'touch {0}',
             r'make (?:a )?(?:new )?(?:file|document) (?:called |named )?(.+)': 'touch {0}',
+            r'create (?:a )?(?:text )?file (?:name |named )?(.+)': 'touch {0}',
+            r'make (?:a )?(?:text )?file (?:name |named )?(.+)': 'touch {0}',
             r'create (?:a )?(?:new )?(?:folder|directory) (?:called |named )?(.+)': 'mkdir {0}',
             r'make (?:a )?(?:new )?(?:folder|directory) (?:called |named )?(.+)': 'mkdir {0}',
             
-            # File viewing
+            # File viewing - specific patterns first
+            r'show (?:me )?(?:the )?files': 'ls',
+            r'list (?:the )?files': 'ls',
             r'show (?:me )?(?:the )?(?:contents? of )?(?:file )?(.+)': 'cat {0}',
             r'display (?:the )?(?:contents? of )?(?:file )?(.+)': 'cat {0}',
             r'read (?:the )?(?:file )?(.+)': 'cat {0}',
             
-            # Directory operations
-            r'list (?:the )?files': 'ls',
+            # Directory operations - specific patterns first
+            r'go to home directory': 'cd ~',
+            r'change to home directory': 'cd ~',
+            r'navigate to home directory': 'cd ~',
+            r'go to the home directory': 'cd ~',
+            r'change to the home directory': 'cd ~',
+            r'navigate to the home directory': 'cd ~',
             r'list (?:the )?(?:files|contents?) (?:in |of )?(?:directory )?(.+)': 'ls {0}',
             r'show (?:me )?(?:the )?(?:files|contents?) (?:in |of )?(?:directory )?(.*)': 'ls {0}',
             r'go to (?:directory )?(.+)': 'cd {0}',
@@ -231,6 +286,56 @@ Completions:"""
                 suggestions.append(phrase)
         
         return suggestions[:5]
+    
+    def process_input(self, user_input: str) -> dict:
+        """
+        Process user input and determine if it's natural language or a command.
+        
+        Args:
+            user_input: User input string
+            
+        Returns:
+            Dictionary with 'command', 'is_natural_language', 'original_input', and 'interpretation'
+        """
+        user_input = user_input.strip()
+        
+        if not user_input:
+            return {
+                'command': '',
+                'is_natural_language': False,
+                'original_input': user_input,
+                'interpretation': None
+            }
+        
+        # Check if it's natural language
+        is_natural = self.is_natural_language(user_input)
+        
+        if is_natural:
+            # Try to interpret as natural language
+            interpreted_command = self.interpret(user_input)
+            if interpreted_command:
+                return {
+                    'command': interpreted_command,
+                    'is_natural_language': True,
+                    'original_input': user_input,
+                    'interpretation': f"Interpreted: '{user_input}' -> '{interpreted_command}'"
+                }
+            else:
+                # If interpretation fails, return the original input as a command
+                return {
+                    'command': user_input,
+                    'is_natural_language': False,
+                    'original_input': user_input,
+                    'interpretation': f"Could not interpret natural language: '{user_input}'"
+                }
+        else:
+            # It's already a command
+            return {
+                'command': user_input,
+                'is_natural_language': False,
+                'original_input': user_input,
+                'interpretation': None
+            }
 
 
 # Backward compatibility

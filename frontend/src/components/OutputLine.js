@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import SyntaxHighlighterComponent, { highlightTerminalOutput } from './SyntaxHighlighter';
 import './OutputLine.css';
 
-const OutputLine = ({ entry, directory }) => {
+const OutputLine = ({ entry, directory, themeColors }) => {
   const formatTimestamp = (timestamp) => {
     return timestamp.toLocaleTimeString('en-US', { 
       hour12: false,
@@ -19,8 +20,52 @@ const OutputLine = ({ entry, directory }) => {
     return `${user}@${host}:${dirName}$`;
   };
 
+  const defaultThemeColors = {
+    primary: '#667eea',
+    accent: '#4ecdc4',
+    text: '#ffffff',
+    textSecondary: 'rgba(255, 255, 255, 0.7)',
+    error: '#ff6b6b',
+    success: '#51cf66',
+    warning: '#ffd43b'
+  };
+
+  const colors = themeColors || defaultThemeColors;
+
   const renderContent = () => {
     if (!entry.content) return null;
+
+    // Check if content looks like code (has multiple lines or specific patterns)
+    const isCode = entry.content.includes('\n') || 
+                   entry.content.includes('{') || 
+                   entry.content.includes('function') ||
+                   entry.content.includes('import') ||
+                   entry.content.includes('def ') ||
+                   entry.content.includes('class ') ||
+                   entry.content.includes('SELECT') ||
+                   entry.content.includes('FROM');
+
+    if (isCode && entry.type === 'output') {
+      return (
+        <SyntaxHighlighterComponent
+          code={entry.content}
+          language="auto"
+          showLineNumbers={entry.content.split('\n').length > 5}
+        />
+      );
+    }
+
+    // For regular output, apply basic highlighting
+    const highlightedContent = highlightTerminalOutput(entry.content, colors);
+    
+    if (highlightedContent !== entry.content) {
+      return (
+        <div 
+          className="output-line-content"
+          dangerouslySetInnerHTML={{ __html: highlightedContent }}
+        />
+      );
+    }
 
     // Split content into lines for better formatting
     const lines = entry.content.split('\n');
@@ -56,24 +101,50 @@ const OutputLine = ({ entry, directory }) => {
     >
       {entry.type === 'command' && (
         <div className="command-display">
-          <span className="command-prompt">{getPrompt(directory)}</span>
-          <span className="command-text">{entry.content}</span>
-          <span className="command-timestamp">{formatTimestamp(entry.timestamp)}</span>
+          <span 
+            className="command-prompt"
+            style={{ color: colors.accent }}
+          >
+            {getPrompt(directory)}
+          </span>
+          <span 
+            className="command-text"
+            style={{ color: colors.text }}
+          >
+            {entry.content}
+          </span>
+          <span 
+            className="command-timestamp"
+            style={{ color: colors.textSecondary }}
+          >
+            {formatTimestamp(entry.timestamp)}
+          </span>
         </div>
       )}
       
       {entry.type !== 'command' && (
         <div className="output-display">
           {entry.type === 'system' && (
-            <span className="system-prefix">ℹ️</span>
+            <span className="system-prefix" style={{ color: colors.primary }}>ℹ️</span>
           )}
           {entry.type === 'error' && (
-            <span className="error-prefix">❌</span>
+            <span className="error-prefix" style={{ color: colors.error }}>❌</span>
           )}
-          <div className="output-content">
+          <div 
+            className="output-content"
+            style={{ 
+              color: entry.type === 'error' ? colors.error : 
+                     entry.type === 'system' ? colors.primary : colors.text 
+            }}
+          >
             {renderContent()}
           </div>
-          <span className="output-timestamp">{formatTimestamp(entry.timestamp)}</span>
+          <span 
+            className="output-timestamp"
+            style={{ color: colors.textSecondary }}
+          >
+            {formatTimestamp(entry.timestamp)}
+          </span>
         </div>
       )}
     </motion.div>

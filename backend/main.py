@@ -26,8 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global terminal instance
-terminal = TerminalCore()
+# Global terminal instance - start in home directory
+terminal = TerminalCore(initial_directory="~")
 ai_interpreter = GeminiAIInterpreter()
 
 class CommandRequest(BaseModel):
@@ -41,6 +41,9 @@ class CommandResponse(BaseModel):
     exit_code: int
     directory: str
     interpreted_command: Optional[str] = None
+    is_natural_language: Optional[bool] = False
+    original_input: Optional[str] = None
+    interpretation: Optional[str] = None
 
 class SuggestionResponse(BaseModel):
     suggestions: List[str]
@@ -53,35 +56,40 @@ async def root():
 async def execute_command(request: CommandRequest):
     """Execute a terminal command or AI natural language command."""
     try:
-        command = request.command.strip()
-        interpreted_command = None
+        user_input = request.command.strip()
         
-        # Check if it's an AI command
-        if command.lower().startswith('ai '):
-            natural_command = command[3:].strip()
-            
-            # Use Gemini AI to interpret the command
-            interpreted_command = await ai_interpreter.interpret_async(natural_command)
-            
-            if interpreted_command:
-                output, exit_code = terminal.execute_command(interpreted_command)
-                # Add interpretation info to output
-                if output:
-                    output = f"🤖 Interpreted: '{natural_command}' → '{interpreted_command}'\n\n{output}"
-                else:
-                    output = f"🤖 Interpreted: '{natural_command}' → '{interpreted_command}'"
+        if not user_input:
+            return CommandResponse(
+                output="",
+                exit_code=0,
+                directory=terminal.current_directory,
+                interpreted_command=None
+            )
+        
+        # Process input with AI interpreter
+        processed = ai_interpreter.process_input(user_input)
+        
+        # Execute the command
+        output, exit_code = terminal.execute_command(processed['command'])
+        
+        # Prepare response
+        interpreted_command = processed['command'] if processed['is_natural_language'] else None
+        
+        # If it was natural language, show the interpretation
+        if processed['is_natural_language'] and processed['interpretation']:
+            if output:
+                output = f"🤖 {processed['interpretation']}\n\n{output}"
             else:
-                output = f"❌ Could not interpret: '{natural_command}'"
-                exit_code = 1
-        else:
-            # Execute regular command
-            output, exit_code = terminal.execute_command(command)
+                output = f"🤖 {processed['interpretation']}"
         
         return CommandResponse(
             output=output,
             exit_code=exit_code,
             directory=terminal.current_directory,
-            interpreted_command=interpreted_command
+            interpreted_command=interpreted_command,
+            is_natural_language=processed['is_natural_language'],
+            original_input=processed['original_input'],
+            interpretation=processed['interpretation']
         )
         
     except Exception as e:

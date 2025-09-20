@@ -12,8 +12,25 @@ from .system_monitor import SystemMonitor
 class TerminalCore:
     """Main terminal engine for processing commands."""
     
-    def __init__(self):
-        self.current_directory = os.getcwd()
+    def __init__(self, initial_directory: str = None):
+        # Set initial directory - default to home directory or user-specified
+        if initial_directory:
+            self.current_directory = os.path.expanduser(initial_directory)
+        else:
+            # Try to start in home directory, fallback to current working directory
+            home_dir = os.path.expanduser("~")
+            if os.path.exists(home_dir):
+                self.current_directory = home_dir
+            else:
+                self.current_directory = os.getcwd()
+        
+        # Change to the initial directory
+        try:
+            os.chdir(self.current_directory)
+        except (PermissionError, OSError):
+            # If we can't change to the desired directory, stay where we are
+            self.current_directory = os.getcwd()
+        
         self.command_history = []
         self.command_registry = CommandRegistry()
         self.system_monitor = SystemMonitor()

@@ -31,39 +31,32 @@ class WebInterface:
         @self.app.route('/execute', methods=['POST'])
         def execute_command():
             data = request.get_json()
-            command = data.get('command', '').strip()
+            user_input = data.get('command', '').strip()
             
-            if not command:
+            if not user_input:
                 return jsonify({'output': '', 'exit_code': 0, 'prompt': self.terminal.get_prompt()})
             
-            # Check if it's a natural language command (starts with 'ai ')
-            if command.lower().startswith('ai '):
-                natural_command = command[3:].strip()
-                interpreted_command = self.ai_interpreter.interpret(natural_command)
-                
-                if interpreted_command:
-                    output, exit_code = self.terminal.execute_command(interpreted_command)
-                    ai_output = f"Interpreted: '{natural_command}' -> '{interpreted_command}'\n{output}"
-                    return jsonify({
-                        'output': ai_output,
-                        'exit_code': exit_code,
-                        'prompt': self.terminal.get_prompt()
-                    })
-                else:
-                    return jsonify({
-                        'output': f"Could not interpret: '{natural_command}'",
-                        'exit_code': 1,
-                        'prompt': self.terminal.get_prompt()
-                    })
+            # Process input with AI interpreter
+            processed = self.ai_interpreter.process_input(user_input)
             
-            # Execute regular command
-            output, exit_code = self.terminal.execute_command(command)
+            # Execute the command
+            output, exit_code = self.terminal.execute_command(processed['command'])
             
-            return jsonify({
+            # Prepare response
+            response_data = {
                 'output': output,
                 'exit_code': exit_code,
-                'prompt': self.terminal.get_prompt()
-            })
+                'prompt': self.terminal.get_prompt(),
+                'is_natural_language': processed['is_natural_language'],
+                'original_input': processed['original_input'],
+                'interpretation': processed['interpretation']
+            }
+            
+            # If it was natural language, show the interpretation
+            if processed['is_natural_language'] and processed['interpretation']:
+                response_data['output'] = f"{processed['interpretation']}\n{output}"
+            
+            return jsonify(response_data)
         
         @self.app.route('/complete', methods=['POST'])
         def auto_complete():
@@ -75,6 +68,24 @@ class WebInterface:
             matches = [cmd for cmd in commands if cmd.startswith(partial_command)]
             
             return jsonify({'completions': matches})
+        
+        @self.app.route('/suggestions', methods=['POST'])
+        def get_suggestions():
+            data = request.get_json()
+            partial_input = data.get('partial', '')
+            
+            if not partial_input:
+                return jsonify({'suggestions': []})
+            
+            # Get AI suggestions for natural language
+            try:
+                import asyncio
+                suggestions = asyncio.run(self.ai_interpreter.get_suggestions_async(partial_input))
+                return jsonify({'suggestions': suggestions})
+            except Exception as e:
+                # Fallback to basic suggestions
+                suggestions = self.ai_interpreter.get_basic_suggestions(partial_input)
+                return jsonify({'suggestions': suggestions})
     
     def run(self, host='localhost', port=5000, debug=True):
         """Run the web interface."""
@@ -160,7 +171,7 @@ def create_web_template():
         <h1>Python Terminal Emulator</h1>
         <div class="help">
             <strong>Commands:</strong> ls, cd, pwd, mkdir, rm, cat, echo, ps, top, df, help, clear<br>
-            <strong>AI Mode:</strong> Type "ai" followed by natural language (e.g., "ai create a new folder called test")
+            <strong>Natural Language:</strong> Type in plain English (e.g., "create a new folder called test", "show me the files", "go to home directory")
         </div>
     </div>
     

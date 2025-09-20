@@ -9,7 +9,9 @@ const CommandInput = ({
   showSuggestions, 
   setShowSuggestions,
   currentDirectory,
-  isLoading 
+  isLoading,
+  themeColors,
+  selectedCommand
 }) => {
   const [input, setInput] = useState('');
   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
@@ -22,6 +24,15 @@ const CommandInput = ({
       inputRef.current.focus();
     }
   }, [isLoading]);
+
+  // Handle command selection from sidebar
+  useEffect(() => {
+    if (selectedCommand) {
+      setInput(selectedCommand);
+      setShowSuggestions(false);
+      inputRef.current?.focus();
+    }
+  }, [selectedCommand]);
 
   useEffect(() => {
     // Request suggestions when input changes
@@ -105,6 +116,18 @@ const CommandInput = ({
     return `${user}@${host}:${dir}$`;
   };
 
+  const defaultThemeColors = {
+    primary: '#667eea',
+    accent: '#4ecdc4',
+    text: '#ffffff',
+    textSecondary: 'rgba(255, 255, 255, 0.7)',
+    surface: 'rgba(255, 255, 255, 0.05)',
+    border: 'rgba(255, 255, 255, 0.1)',
+    shadow: 'rgba(0, 0, 0, 0.3)'
+  };
+
+  const colors = themeColors || defaultThemeColors;
+
   return (
     <div className="command-input-container">
       <AnimatePresence>
@@ -115,10 +138,23 @@ const CommandInput = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
+            style={{
+              background: colors.surface,
+              border: `1px solid ${colors.border}`,
+              boxShadow: `0 10px 30px ${colors.shadow}`
+            }}
           >
-            <div className="suggestions-header">
-              <span>AI Suggestions</span>
-              <span className="suggestions-hint">Tab to complete • ↑↓ to navigate</span>
+            <div 
+              className="suggestions-header"
+              style={{ 
+                borderBottom: `1px solid ${colors.border}`,
+                background: colors.primary + '10'
+              }}
+            >
+              <span style={{ color: colors.primary }}>AI Suggestions</span>
+              <span className="suggestions-hint" style={{ color: colors.textSecondary }}>
+                Tab to complete • ↑↓ to navigate
+              </span>
             </div>
             <div className="suggestions-list">
               {suggestions.map((suggestion, index) => (
@@ -126,10 +162,14 @@ const CommandInput = ({
                   key={index}
                   className={`suggestion-item ${index === selectedSuggestion ? 'selected' : ''}`}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  whileHover={{ backgroundColor: 'rgba(102, 126, 234, 0.2)' }}
+                  whileHover={{ backgroundColor: colors.primary + '20' }}
+                  style={{
+                    backgroundColor: index === selectedSuggestion ? colors.primary + '30' : 'transparent',
+                    borderLeft: index === selectedSuggestion ? `3px solid ${colors.primary}` : '3px solid transparent'
+                  }}
                 >
                   <span className="suggestion-icon">💡</span>
-                  <span className="suggestion-text">{suggestion}</span>
+                  <span className="suggestion-text" style={{ color: colors.text }}>{suggestion}</span>
                 </motion.div>
               ))}
             </div>
@@ -139,7 +179,12 @@ const CommandInput = ({
 
       <form onSubmit={handleSubmit} className="command-form">
         <div className="prompt-line">
-          <span className="prompt">{getPrompt()}</span>
+          <span 
+            className="prompt"
+            style={{ color: colors.accent }}
+          >
+            {getPrompt()}
+          </span>
           <div className="input-wrapper">
             <input
               ref={inputRef}
@@ -148,10 +193,14 @@ const CommandInput = ({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               className="command-input"
-              placeholder={isLoading ? "Processing..." : "Type a command or 'ai <natural language>'"}
+              placeholder={isLoading ? "Processing..." : "Type a command or natural language query"}
               disabled={isLoading}
               autoComplete="off"
               spellCheck="false"
+              style={{
+                color: colors.text,
+                caretColor: colors.primary
+              }}
             />
             <div className="typing-indicator">
               {input && (
@@ -159,6 +208,7 @@ const CommandInput = ({
                   className="cursor"
                   animate={{ opacity: [1, 0] }}
                   transition={{ duration: 1, repeat: Infinity }}
+                  style={{ background: colors.primary }}
                 />
               )}
             </div>
